@@ -1,0 +1,38 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap # create an access point per PVC
+  fileSystemId: fs-0d35571c2888bb636 # your existing EFS
+  directoryPerms: "700"
+  basePath: "/dynamic_provisioning" # parent directory for the PVC directories
+reclaimPolicy: Delete # or Retain
+volumeBindingMode: Immediate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-claim
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc # <-- this triggers provisioning
+  resources:
+    requests:
+      storage: 5Gi # required, but ignored by EFS
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-claim-1
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc # <-- this triggers provisioning
+  resources:
+    requests:
+      storage: 5Gi # required, but ignored by EFS
